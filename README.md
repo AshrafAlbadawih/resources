@@ -1,1 +1,33 @@
-# resources
+# 
+arduinoObj = arduino('COM3', 'Uno');
+moisturePin = 'A1';
+temperaturePin = 'A0';
+numReadings = 100;
+moistureData = readData(arduinoObj, moisturePin, numReadings);
+temperatureData = readData(arduinoObj, temperaturePin, numReadings);
+moistureData = convertToMoisture(moistureData);
+temperatureData = convertToTemperature(temperatureData);
+hold on
+plot(moistureData);
+plot(temperatureData);
+hold off
+xlswrite('sensor_data.xlsx', {'Moisture', 'Temperature'}, 'Sheet1', 'A1:B1');
+xlswrite('sensor_data.xlsx', [moistureData' temperatureData'], 'Sheet1', 'A2');
+function data = readData(arduinoObj, pin, numReadings)
+    data = zeros(1, numReadings);
+    for i = 1:numReadings
+        data(i) = readVoltage(arduinoObj, pin);
+        pause(0.1);
+    end
+end
+function moistureData = convertToMoisture(data)
+    moistureData =  (data*20)-100;
+    if moistureData<0 
+        moistureData= -1*moistureData;
+    end
+
+end
+
+function temperatureData = convertToTemperature(data)
+    temperatureData = data*100;
+end
